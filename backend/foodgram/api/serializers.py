@@ -5,7 +5,6 @@ from rest_framework import serializers
 
 from recipes.models import (AmountIngredient, Favorite, Follow, Ingredient,
                             Recipe, ShoppingCart, Tag)
-# from users.models import User
 
 User = get_user_model()
 
@@ -279,20 +278,16 @@ class FollowSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, obj):
+        recipe = Recipe.objects.filter(author=obj.following).order_by('-id')
+
         if not self.context:
-            return RecipeFollowSerializer(
-                Recipe.objects.filter(author=obj.following), many=True
-            ).data
+            return RecipeFollowSerializer(recipe, many=True).data
         if 'recipes_limit' in self.context.get('request').query_params:
             limit = int(
                 self.context.get('request').query_params.get('recipes_limit')
             )
-            return RecipeFollowSerializer(
-                Recipe.objects.filter(author=obj.following)[:limit], many=True
-            ).data
-        return RecipeFollowSerializer(
-            Recipe.objects.filter(author=obj.following), many=True
-        ).data
+            return RecipeFollowSerializer(recipe[:limit], many=True).data
+        return RecipeFollowSerializer(recipe, many=True).data
 
     def get_is_subscribed(self, obj):
         return Follow.objects.filter(following=obj.following_id,

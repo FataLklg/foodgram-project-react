@@ -1,5 +1,4 @@
 from django.contrib import admin
-# from django.utils.safestring import mark_safe
 
 from .models import (AmountIngredient, Favorite, Follow, Ingredient, Recipe,
                      ShoppingCart, Tag)
@@ -47,28 +46,24 @@ class RecipeAdmin(admin.ModelAdmin):
         'image',
         'get_ingredients',
         'get_tags',
-        'cooking_time'
+        'cooking_time',
+        'get_count_add_to_favorite'
     )
     search_fields = ('name',)
+    list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
 
     def get_ingredients(self, obj):
-        return '\n'.join([i.name for i in obj.ingredients.all()])
+        return '\n'.join([i.name + ',' for i in obj.ingredients.all()])
     get_ingredients.short_description = 'Ингредиенты'
 
     def get_tags(self, obj):
-        return '\n'.join([t.name for t in obj.tags.all()])
+        return '\n'.join([t.name + ',' for t in obj.tags.all()])
     get_tags.short_description = 'Теги'
 
-#    def image_show(self, obj):
-#        print(obj.image.url)
-#        if obj.image:
-#            return mark_safe(
-#               "<img src='{}' width='60' />".format(obj.image.url
-#            ))
-#        return "None"
-#
-#    image_show.__name__ = 'Картинка'
+    def get_count_add_to_favorite(self, obj):
+        return len(Favorite.objects.filter(recipe=obj))
+    get_count_add_to_favorite.short_description = 'Кол-во в избранном'
 
 
 @admin.register(Follow)

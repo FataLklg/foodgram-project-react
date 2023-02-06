@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -150,11 +151,12 @@ class IngredientVievSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny]
+    filter_backends = (SearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
-    queryset = Recipe.objects.all()
     pagination_class = CustomPaginations
     http_method_names = ['get', 'post', 'patch', 'delete']
 
@@ -162,7 +164,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         req = self.request
         queryset = Recipe.objects
         if not req.query_params:
-            return queryset.all()
+            return queryset.all().order_by('-id')
         if req.query_params.get('author'):
             queryset = queryset.filter(author=req.query_params['author'])
         if (req.query_params.get('is_favorited') == '1' and
@@ -173,7 +175,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(shopping_carts__user=req.user)
         if req.query_params.get('tags'):
             queryset = queryset.filter(tags__name=req.query_params['tags'])
-        return queryset
+        return queryset.order_by('-id')
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
