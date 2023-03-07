@@ -25,7 +25,7 @@ class CustomTokenCreateSerializer(serializers.Serializer):
         trim_whitespace=False,
         write_only=True
     )
-    token = serializers.CharField(
+    auth_token = serializers.CharField(
         label="Token",
         read_only=True
     )
@@ -48,9 +48,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = Follow.objects.filter(following=obj.id,
-                                         user=request_user).exists()
-        return queryset
+        return Follow.objects.filter(following=obj.id,
+                                     user=request_user).exists()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -124,15 +123,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = Favorite.objects.filter(recipe=obj.id,
-                                           user=request_user).exists()
-        return queryset
+        return Favorite.objects.filter(recipe=obj.id,
+                                       user=request_user).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = ShoppingCart.objects.filter(recipe=obj.id,
-                                               user=request_user).exists()
-        return queryset
+        return ShoppingCart.objects.filter(recipe=obj.id,
+                                           user=request_user).exists()
 
 
 class TagCreateInRecipeSerializer(serializers.ModelSerializer):
@@ -189,15 +186,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = Favorite.objects.filter(recipe=obj.id,
-                                           user=request_user).exists()
-        return queryset
+        return Favorite.objects.filter(recipe=obj.id,
+                                       user=request_user).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request_user = self.context.get('request').user.id
-        queryset = ShoppingCart.objects.filter(recipe=obj.id,
-                                               user=request_user).exists()
-        return queryset
+        return ShoppingCart.objects.filter(recipe=obj.id,
+                                           user=request_user).exists()
 
     @transaction.atomic
     def create(self, validated_data):
@@ -218,6 +213,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         AmountIngredient.objects.bulk_create(amount_ing_create)
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('amountingredient_set', None)
         tags = validated_data.pop('tags', None)
@@ -240,8 +236,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         self.fields['tags'] = TagSerializer(many=True)
-        representation = super().to_representation(instance)
-        return representation
+        return super().to_representation(instance)
 
 
 class RecipeFollowSerializer(serializers.ModelSerializer):
@@ -294,8 +289,17 @@ class FollowSerializer(serializers.ModelSerializer):
                                      user=obj.user_id).exists()
 
     def get_recipes_count(self, obj):
-        author = obj.following_id
-        return len(Recipe.objects.filter(author=author))
+        return len(Recipe.objects.filter(author=obj.following_id))
+
+    def validate(self, attrs):
+        if 'request' in self.context:
+            if 'recipes_limit' in (
+                self.context.get('request').query_params) and int(
+                self.context.get('request').query_params.get('recipes_limit')
+            ) < 0:
+                raise serializers.ValidationError(
+                    {"recipes_limit": ["Число должно быть > или = 0."]})
+        return super().validate(attrs)
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
@@ -316,18 +320,8 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
+class ShoppingCartSerializer(FavoriteRecipeSerializer):
     """Сериализатор для добавления рецептов в корзину."""
-    id = serializers.SlugRelatedField(source='recipe',
-                                      slug_field='id',
-                                      read_only=True)
-    name = serializers.SlugRelatedField(source='recipe',
-                                        slug_field='name',
-                                        read_only=True)
-    image = Base64ImageField(source='recipe.image', read_only=True)
-    cooking_time = serializers.SlugRelatedField(source='recipe',
-                                                slug_field='cooking_time',
-                                                read_only=True)
 
     class Meta:
         model = ShoppingCart

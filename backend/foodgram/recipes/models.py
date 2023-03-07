@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -20,7 +21,7 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     """Модель тегов."""
     name = models.CharField('Название', max_length=200, unique=True)
-    color = models.CharField('Цвет', max_length=7, unique=True)
+    color = ColorField('Цвет', max_length=7, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
 
     class Meta:
@@ -41,7 +42,7 @@ class Recipe(models.Model):
     )
     name = models.CharField('Название', max_length=200, db_index=True)
     image = models.ImageField('Изображение',
-                              upload_to='media/recipes/images',
+                              upload_to='recipes/images',
                               blank=True,
                               null=True)
     text = models.TextField('Описание')

@@ -8,7 +8,7 @@ from django.db import migrations
 def load_ingredients_data(apps, schema_editor):
     Ingredient = apps.get_model('recipes', 'Ingredient')
 
-    with open('../../data/ingredients.csv', 'r', encoding='utf-8') as csv_file:
+    with open('./data/ingredients.csv', 'r', encoding='utf-8') as csv_file:
         reader = csv.reader(csv_file)
         ingredients = []
 
