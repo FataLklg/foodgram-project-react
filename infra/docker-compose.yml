@@ -10,9 +10,7 @@ services:
     container_name: foodgram_db
 
   back:
-    build:
-      context: ../backend/foodgram
-      dockerfile: Dockerfile
+    image: fatalklg/foodgram_back:latest
     volumes:
       - ../data/:/app/data/
       - static_value:/app/static/
@@ -25,9 +23,7 @@ services:
     container_name: foodgram_backend
 
   front:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: fatalklg/foodgram_front:latest
     volumes:
       - ../frontend/:/app/result_build/
       - static_value:/app/static/
