@@ -1,5 +1,5 @@
 Django==3.2.16
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.5
 python-dotenv==0.20.0
 djangorestframework==3.12.4
 django-filter==2.4.0
