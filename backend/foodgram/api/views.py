@@ -115,9 +115,9 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = FollowSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             following = get_object_or_404(
-                    User,
-                    id=self.kwargs.get('pk')
-                )
+                User,
+                id=self.kwargs.get('pk')
+            )
 
             if request.method == 'POST':
                 if self.request.user == following:
@@ -198,9 +198,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = FavoriteRecipeSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             recipe = get_object_or_404(
-                    Recipe,
-                    id=self.kwargs.get('pk')
-                )
+                Recipe,
+                id=self.kwargs.get('pk')
+            )
 
             if request.method == 'POST':
                 if Favorite.objects.filter(user=self.request.user,
