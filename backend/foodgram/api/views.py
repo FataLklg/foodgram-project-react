@@ -39,10 +39,6 @@ class TokenCreateViewSet(ObtainAuthToken):
             return Response({
                 'auth_token': token.key,
             })
-        return Response(
-            {"current_password": ["Введён некорректный пароль."]},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
