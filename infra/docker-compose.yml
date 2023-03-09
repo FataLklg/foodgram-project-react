@@ -26,8 +26,8 @@ services:
     image: fatalklg/foodgram_front:latest
     volumes:
       - ../frontend/:/app/result_build/
-      - static_value:/app/static/
-      - media_value:/app/media/
+      - static_value:/app/build/static/
+      - media_value:/app/build/media/
     depends_on:
       - db
     container_name: foodgram_frontend
